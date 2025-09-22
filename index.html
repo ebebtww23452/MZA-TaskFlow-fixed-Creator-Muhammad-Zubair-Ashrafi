@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+  
+
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MZA — TaskFlow (fixed) — Creator & Muhammad Zubair Ashrafi</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="src/kkkkkkkkkk-removebg-preview.png">
+<style>
+  :root{
+    --bg:#000; --card:#0b0b0b; --muted:#a9b3bf; --accent:#00e6c3; --white:#ffffff; --danger:#ff5c5c;
+    --radius:12px; --pad:12px; --shadow: 0 6px 24px rgba(0,0,0,0.6);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:'Poppins',system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--white);font-size:16px}
+  .container{max-width:1100px;margin:20px auto;padding:18px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:56px;height:56px;border-radius:10px;background:#111;display:flex;align-items:center;justify-content:center}
+  button.btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+  button.primary{background:var(--white);color:#020617;border:none}
+  .card{background:var(--card);border-radius:var(--radius);padding:var(--pad);border:1px solid rgba(255,255,255,0.04);box-shadow:var(--shadow);margin-bottom:12px}
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:18px}
+  @media(max-width:980px){ .grid{grid-template-columns:1fr} .right-col{order:2} }
+  input[type=text],textarea,input[type=password]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--white)}
+  .task-row{display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);margin-bottom:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+  .task-title{flex:1;font-size:16px;font-weight:700}
+  .meta{font-size:12px;color:var(--muted);margin-top:6px}
+  .pill{padding:6px 10px;border-radius:999px;font-weight:800;font-size:13px}
+  .status-pending{background:rgba(255,255,255,0.03);color:var(--muted)}
+  .status-done{background:#12b76a;color:#02160f}
+  .status-wrong{background:var(--danger);color:#120202}
+  .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;background:transparent}
+  .msg-list{max-height:260px;overflow:auto;padding:6px;display:flex;flex-direction:column;gap:8px}
+  .msg-item{padding:8px;border-radius:8px;background:rgba(255,255,255,0.02)}
+  .small{font-size:13px;color:var(--muted)}
+  footer{padding:10px 0;text-align:center;color:var(--muted);font-size:13px}
+  .status-controls button{padding:6px 8px;border-radius:8px;border:none;margin-left:6px;cursor:pointer;font-weight:700}
+  .status-controls .s-pend{background:rgba(255,255,255,0.03);color:var(--muted)}
+  .status-controls .s-done{background:#12b76a;color:#02160f}
+  .status-controls .s-wrong{background:var(--danger);color:#120202}
+</style>
+</head>
+<body>
+  <!-- LOCK OVERLAY -->
+  <div id="lockOverlay" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:9999">
+    <div class="card" style="max-width:520px;width:92%">
+      <div id="stepSystem" class="step active">
+        <h2 style="margin:0 0 8px 0">System unlock — سسٹم کھولیں</h2>
+        <div class="small">Enter system password to continue. سسٹم پاس ورڈ درج کریں۔</div>
+        <div style="height:12px"></div>
+        <input id="systemPass" type="password" placeholder="Enter system password" />
+        <div style="height:10px;display:flex;justify-content:flex-end">
+          <button id="systemNextBtn" class="btn primary">Next — آگے</button>
+        </div>
+      </div>
+
+      <div id="stepRole" class="step" style="display:none">
+        <h2 style="margin:0 0 8px 0">Choose role — رول منتخب کریں</h2>
+        <div class="small">Pick which view you want: Creator (you) or <strong>Muhammad Zubair Ashrafi</strong>. رول منتخب کریں۔</div>
+        <div style="height:12px"></div>
+        <div style="display:flex;gap:12px">
+          <button id="chooseCreator" class="btn">Creator — (آپ)</button>
+          <button id="chooseBoss" class="btn">Muhammad Zubair Ashrafi — (جانی)</button>
+        </div>
+        <div style="height:12px;display:flex;justify-content:flex-end">
+          <button id="roleBackBtn" class="btn">Back</button>
+        </div>
+      </div>
+
+      <div id="stepRolePass" class="step" style="display:none">
+        <h2 id="rolePassTitle" style="margin:0 0 8px 0">Enter role password</h2>
+        <div class="small" id="rolePassHint">Enter password for selected role</div>
+        <div style="height:12px"></div>
+        <input id="rolePassInput" type="password" placeholder="Role password" />
+        <div style="height:10px;display:flex;justify-content:flex-end">
+          <button id="roleUnlockBtn" class="btn primary">Unlock</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo"><strong style="font-size:18px">MZA</strong></div>
+        <div>
+          <div style="font-weight:800">MZA — TaskFlow</div>
+          <div class="small" id="projectTag">Create tasks — Muhammad Zubair Ashrafi reviews</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="role-badge" id="currentRole">Locked</div>
+        <div class="small" id="headerClock">--:--:--</div>
+        <button id="lockBtn" class="btn">Lock</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- LEFT -->
+      <div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+            <div style="flex:1">
+              <div class="small">Project Message</div>
+              <div id="projectMsgDisplay" contenteditable="true" style="min-height:72px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);margin-top:8px"></div>
+              <div style="height:8px"></div>
+              <div class="small">Detected language: <span id="projectMsgLang">—</span></div>
+            </div>
+            <div style="min-width:140px;text-align:right">
+              <div class="small">Auto-save</div>
+              <label style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
+                <input type="checkbox" id="autoSaveChk" checked /> <span class="small">Auto</span>
+              </label>
+              <div style="height:8px"></div>
+              <div class="small">Last saved: <span id="lastSaved">never</span></div>
+            </div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div id="creatorControls">
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="taskInput" type="text" placeholder="Add new task..." />
+              <button id="addTaskBtn" class="btn primary">Add Task</button>
+              <button id="exportBtn" class="btn">Export</button>
+              <button id="importBtn" class="btn">Import</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="tasksContainer" class="card">
+          <h3 style="margin:0 0 8px 0">Tasks <span id="tasksCount" class="small" style="margin-left:8px"></span></h3>
+          <div id="tasksList"></div>
+        </div>
+
+        <div class="card">
+          <div class="small">How to use</div>
+          <ol style="margin-top:8px">
+            <li>Creator: unlock as Creator to add/edit tasks.</li>
+            <li><strong>Muhammad Zubair Ashrafi</strong>: unlock with his password to review statuses and send messages/voice notes.</li>
+            <li>Export/Import moves data as JSON (client-only demo).</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <aside class="right-col">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Role</div>
+              <div id="roleBox" style="font-weight:800">Locked</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small">Date</div>
+              <div id="dateBox" style="font-weight:700">--</div>
+            </div>
+          </div>
+          <hr style="opacity:.06;margin:12px 0"/>
+          <div style="display:flex;gap:8px">
+            <button id="saveBtn" class="btn">Save</button>
+            <button id="clearBtn" class="btn">Clear all</button>
+          </div>
+        </div>
+
+        <div id="commCard" class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="small">Communications</div>
+            <div class="small">Action</div>
+          </div>
+
+          <div id="bossTools" style="display:none;margin-top:12px">
+            <div class="small">Quick message</div>
+            <textarea id="bossQuickMsg" rows="3" placeholder="Write a quick message to creator..." style="width:100%;margin-top:8px"></textarea>
+            <div style="height:8px"></div>
+            <div style="display:flex;gap:8px">
+              <button id="sendQuickMsgBtn" class="btn primary">Send</button>
+            </div>
+            <div style="height:12px"></div>
+            <div class="small">Messages</div>
+            <div id="commMsgList" class="msg-list" style="margin-top:8px"></div>
+          </div>
+
+          <div id="creatorComm" style="display:none;margin-top:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div class="small">Notifications</div>
+              <button id="markAllRead" class="btn">Mark all read</button>
+            </div>
+            <div id="creatorNotifList" class="msg-list" style="margin-top:8px"></div>
+          </div>
+        </div>
+
+        <div class="card clock-card" style="text-align:center">
+          <div id="clockLabel" style="font-weight:800">--:--:--</div>
+          <div id="clockDate" class="small" style="margin-top:6px">--</div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>Task Sheet • Client-only demo — move auth & storage to backend for production.</footer>
+  </div>
+
+<script>
+/* CONFIG */
+const SYSTEM_PW = "@MZA.com";            // demo only
+const CREATOR_PW = "zainarooj78978";    // demo only
+const ZUBAIR_PW = "MZA.com";            // demo only (Muhammad Zubair Ashrafi)
+const STORAGE_KEY = "tasksheet_v5";
+
+/* STATE */
+let tasks = []; // {id,title,createdAt,lastUpdated,bossStatus}
+let messages = []; // {id,taskId,type,text,audioDataURL,from,to,createdAt,read}
+let role = null; // 'creator' | 'zubair' | null
+let autoSave = true;
+let projectMessage = '';
+let bossNoteText = '';
+
+/* HELPERS */
+const $ = id => document.getElementById(id);
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function nowISO(){ return new Date().toISOString(); }
+function detectLang(text){ if(!text) return '—'; const urRegex = /[\u0600-\u06FF\u0750-\u077F]/; return urRegex.test(text) ? 'UR' : 'EN'; }
+function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); }
+
+/* STORAGE */
+function saveAll(){
+  const payload = { tasks, messages, projectMessage, bossNoteText, savedAt: nowISO() };
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    $('lastSaved').textContent = new Date().toLocaleString();
+  }catch(e){ console.warn('save fail', e); }
+}
+function loadAll(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const obj = JSON.parse(raw);
+    tasks = obj.tasks || [];
+    messages = obj.messages || [];
+    projectMessage = obj.projectMessage || '';
+    bossNoteText = obj.bossNoteText || '';
+  }catch(e){ console.warn('load fail', e); }
+}
+
+/* RENDER TASKS */
+function renderTasks(){
+  const list = $('tasksList');
+  list.innerHTML = '';
+  $('tasksCount').textContent = `${tasks.length ? '('+tasks.length+')' : ''}`;
+
+  if(tasks.length===0){
+    const empty = document.createElement('div'); empty.className='small'; empty.textContent = 'No tasks yet';
+    list.appendChild(empty); return;
+  }
+
+  tasks.forEach(task=>{
+    const row = document.createElement('div'); row.className='task-row';
+
+    const left = document.createElement('div'); left.style.width='10px';
+    const center = document.createElement('div'); center.style.flex='1';
+    const titleDiv = document.createElement('div'); titleDiv.className='task-title';
+    const titleInput = document.createElement('input'); titleInput.type='text'; titleInput.value = task.title || '';
+    titleInput.onblur = ()=>{ task.title = titleInput.value || 'Untitled'; task.lastUpdated = nowISO(); if(autoSave) saveAll(); renderTasks(); };
+    titleInput.readOnly = role !== 'creator';
+    titleDiv.appendChild(titleInput);
+    const meta = document.createElement('div'); meta.className='meta'; meta.textContent = 'Created: ' + new Date(task.createdAt).toLocaleString();
+    titleDiv.appendChild(meta);
+    center.appendChild(titleDiv);
+
+    // right column
+    const right = document.createElement('div'); right.style.display='flex'; right.style.flexDirection='column'; right.style.alignItems='flex-end'; right.style.gap='8px'; right.style.minWidth='200px';
+
+    // status pill
+    const statusPill = document.createElement('div'); statusPill.className='pill';
+    if(task.bossStatus==='done'){ statusPill.classList.add('status-done'); statusPill.textContent = 'Done'; }
+    else if(task.bossStatus==='wrong'){ statusPill.classList.add('status-wrong'); statusPill.textContent = 'Wrong'; }
+    else { statusPill.classList.add('status-pending'); statusPill.textContent = 'Pending'; }
+
+    // icons
+    const icons = document.createElement('div'); icons.style.display='flex'; icons.style.gap='8px'; icons.style.alignItems='center';
+    const msgBtn = document.createElement('button'); msgBtn.className='icon-btn'; msgBtn.title='Messages'; msgBtn.innerHTML = '💬';
+    const micBtn = document.createElement('button'); micBtn.className='icon-btn'; micBtn.title='Voice'; micBtn.innerHTML = '🎤';
+    icons.appendChild(msgBtn); icons.appendChild(micBtn);
+
+    // status controls (visible to Muhammad Zubair Ashrafi)
+    const statusControls = document.createElement('div'); statusControls.className='status-controls';
+    if(role==='zubair'){
+      const bPend = document.createElement('button'); bPend.className='s-pend'; bPend.textContent='Pending'; bPend.onclick = ()=>{ setTaskStatus(task.id,'pending'); };
+      const bDone = document.createElement('button'); bDone.className='s-done'; bDone.textContent='Done'; bDone.onclick = ()=>{ setTaskStatus(task.id,'done'); };
+      const bWrong = document.createElement('button'); bWrong.className='s-wrong'; bWrong.textContent='Wrong'; bWrong.onclick = ()=>{ setTaskStatus(task.id,'wrong'); };
+      statusControls.appendChild(bPend); statusControls.appendChild(bDone); statusControls.appendChild(bWrong);
+    }
+
+    // delete button for creator
+    const bottomRow = document.createElement('div'); bottomRow.style.display='flex'; bottomRow.style.alignItems='center'; bottomRow.style.gap='8px';
+    if(role==='creator'){
+      const del = document.createElement('button'); del.className='btn'; del.textContent='Delete'; del.onclick = ()=>{ if(confirm('Delete this task?')){ tasks = tasks.filter(t=>t.id!==task.id); saveAll(); renderTasks(); } };
+      bottomRow.appendChild(del);
+    }
+    const lu = document.createElement('div'); lu.className='small'; lu.textContent = 'Updated: ' + (task.lastUpdated ? new Date(task.lastUpdated).toLocaleString() : '-');
+    bottomRow.appendChild(lu);
+
+    right.appendChild(statusPill);
+    right.appendChild(icons);
+    if(role==='zubair') right.appendChild(statusControls);
+    right.appendChild(bottomRow);
+
+    row.appendChild(left); row.appendChild(center); row.appendChild(right);
+    list.appendChild(row);
+
+    // message & mic behavior
+    msgBtn.onclick = ()=>{ openComposerForTask(task.id); };
+    micBtn.onclick = ()=>{ if(role!=='zubair'){ playLatestAudio(task.id); } else { startRecordingForTask(task.id); } };
+  });
+}
+
+/* TASK helpers */
+function setTaskStatus(taskId, status){
+  const t = tasks.find(x=>x.id===taskId);
+  if(!t) return;
+  t.bossStatus = status;
+  t.lastUpdated = nowISO();
+  saveAll();
+  renderTasks();
+}
+
+/* COMM & NOTIFS */
+function renderCommLists(){
+  const list = $('commMsgList'); list.innerHTML='';
+  messages.slice().reverse().forEach(m=>{
+    const it = document.createElement('div'); it.className='msg-item';
+    if(m.type==='text') it.innerHTML = `<div>${escapeHtml(m.text)}</div><div class="small">${new Date(m.createdAt).toLocaleString()}</div>`;
+    else it.innerHTML = `<div>Voice note</div><audio controls src="${m.audioDataURL}" style="width:100%"></audio><div class="small">${new Date(m.createdAt).toLocaleString()}</div>`;
+    list.appendChild(it);
+  });
+
+  const cl = $('creatorNotifList'); cl.innerHTML='';
+  messages.filter(m=>m.to==='creator').slice().reverse().forEach(m=>{
+    const it = document.createElement('div'); it.className='msg-item';
+    it.innerHTML = m.type==='text' ? `<div><strong>Message:</strong> ${escapeHtml(m.text)}</div><div class="small">${new Date(m.createdAt).toLocaleTimeString()}</div>` : `<div><strong>Voice note</strong></div><audio controls src="${m.audioDataURL}" style="width:100%"></audio><div class="small">${new Date(m.createdAt).toLocaleTimeString()}</div>`;
+    it.onclick = ()=>{ m.read = true; saveAll(); renderNotifications(); renderCommLists(); };
+    cl.appendChild(it);
+  });
+}
+
+function renderNotifications(){
+  const unread = messages.filter(m=>m.to==='creator' && !m.read).length;
+  const n = $('headerClock'); // reuse spot? better show badge later; keep simple now
+  if(unread>0){ /* you can show a badge */ }
+}
+
+/* messaging composer */
+let activeComposerTask = null;
+function openComposerForTask(taskId){
+  // simple prompt-based composer for demo
+  const txt = prompt('Write message to Creator:');
+  if(!txt) return;
+  const m = { id: uid(), taskId, type:'text', text:txt, from:'zubair', to:'creator', createdAt: nowISO(), read:false };
+  messages.push(m); saveAll(); renderCommLists(); alert('Message sent');
+}
+
+/* audio play & record (simple) */
+function playLatestAudio(taskId){
+  const aud = messages.filter(m=>m.taskId===taskId && m.type==='audio').pop();
+  if(!aud){ alert('No voice note for this task'); return; }
+  const a = new Audio(aud.audioDataURL); a.play();
+}
+
+/* Recording using MediaRecorder (only for zubair to record) */
+let activeRecorder = null, recordedChunks = [], activeStream = null, activeRecordingTask = null;
+async function startRecordingForTask(taskId){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    recordedChunks = [];
+    activeRecorder = new MediaRecorder(stream);
+    activeRecordingTask = taskId;
+    activeStream = stream;
+    activeRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
+    activeRecorder.onstop = ()=> {
+      const blob = new Blob(recordedChunks, { type:'audio/webm' });
+      const reader = new FileReader();
+      reader.onloadend = ()=> {
+        const dataUrl = reader.result;
+        const m = { id: uid(), taskId, type:'audio', audioDataURL:dataUrl, from:'zubair', to:'creator', createdAt: nowISO(), read:false };
+        messages.push(m); saveAll(); renderCommLists(); alert('Voice note sent');
+        if(activeStream) activeStream.getTracks().forEach(t=>t.stop());
+        activeStream = null; activeRecorder = null; recordedChunks = []; activeRecordingTask = null;
+      };
+      reader.readAsDataURL(blob);
+    };
+    activeRecorder.start();
+    alert('Recording started — click the red microphone icon again to stop (or it will auto-stop after 45s).');
+    setTimeout(()=>{ if(activeRecorder && activeRecorder.state==='recording') activeRecorder.stop(); },45000);
+  }catch(err){ console.error(err); alert('Microphone not available or permission denied.'); }
+}
+
+/* simple stop (used if user clicks again) */
+function stopRecordingForTask(){
+  if(activeRecorder && activeRecorder.state==='recording') activeRecorder.stop();
+}
+
+/* APPLY ROLE UI */
+function applyRoleUI(){
+  $('currentRole').textContent = role ? (role==='creator' ? 'Creator' : 'Muhammad Zubair Ashrafi') : 'Locked';
+  $('roleBox').textContent = role ? (role==='creator' ? 'Creator' : 'Muhammad Zubair Ashrafi') : 'Locked';
+  $('creatorControls').style.display = role==='creator' ? 'block' : 'none';
+  $('bossTools').style.display = role==='zubair' ? 'block' : 'none';
+  $('creatorComm').style.display = role==='creator' ? 'block' : 'none';
+  $('projectMsgDisplay').contentEditable = role==='creator';
+  renderBossAudioUI();
+  renderTasks();
+  renderCommLists();
+  renderNotifications();
+  // show/hide import/export for all (kept)
+}
+
+/* boss audio UI (preview last audio) */
+function renderBossAudioUI(){
+  // nothing fancy here for now
+}
+
+/* LOCK FLOW UI */
+function showStep(id){
+  ['stepSystem','stepRole','stepRolePass'].forEach(s=>{ const el=$(s); if(el) el.style.display='none'; });
+  const el = $(id); if(el) el.style.display='block';
+}
+
+/* EVENT BINDINGS */
+$('systemNextBtn').onclick = ()=> {
+  const v = $('systemPass').value.trim();
+  if(v===SYSTEM_PW){ $('systemPass').value=''; showStep('stepRole'); } else alert('System password incorrect');
+};
+$('roleBackBtn').onclick = ()=> showStep('stepSystem');
+
+let selectedRoleForUnlock = null;
+$('chooseCreator').onclick = ()=>{ selectedRoleForUnlock='creator'; $('rolePassTitle').textContent='Creator password'; $('rolePassHint').textContent='Enter Creator password'; $('rolePassInput').value=''; showStep('stepRolePass'); };
+$('chooseBoss').onclick = ()=>{ selectedRoleForUnlock='zubair'; $('rolePassTitle').textContent='Muhammad Zubair Ashrafi password'; $('rolePassHint').textContent='Enter password for Muhammad Zubair Ashrafi'; $('rolePassInput').value=''; showStep('stepRolePass'); };
+
+$('roleUnlockBtn').onclick = ()=> {
+  const v = $('rolePassInput').value.trim();
+  if(selectedRoleForUnlock==='creator' && v===CREATOR_PW){ role='creator'; $('lockOverlay').style.display='none'; loadAll(); applyRoleUI(); }
+  else if(selectedRoleForUnlock==='zubair' && v===ZUBAIR_PW){ role='zubair'; $('lockOverlay').style.display='none'; loadAll(); applyRoleUI(); }
+  else { alert('Role password incorrect'); }
+};
+
+$('lockBtn').onclick = ()=> { role=null; applyRoleUI(); $('lockOverlay').style.display='flex'; showStep('stepSystem'); selectedRoleForUnlock=null; };
+
+window.addEventListener('load', ()=>{
+  // clocks
+  setInterval(()=>{ const d=new Date(); $('headerClock').textContent = d.toLocaleTimeString(); $('clockLabel').textContent = d.toLocaleTimeString(); $('clockDate').textContent = d.toLocaleDateString(); },1000);
+
+  // load stored
+  loadAll();
+  $('projectMsgDisplay').textContent = projectMessage || 'Welcome — edit this note.';
+  applyRoleUI();
+});
+
+/* creator add task */
+$('addTaskBtn').onclick = ()=>{
+  if(role!=='creator'){ alert('Unlock as Creator to add tasks'); return; }
+  const v = $('taskInput').value.trim(); if(!v) return alert('Enter task');
+  const t = { id: uid(), title: v, createdAt: nowISO(), lastUpdated: nowISO(), bossStatus: 'pending' };
+  tasks.unshift(t); $('taskInput').value=''; if(autoSave) saveAll(); renderTasks();
+};
+
+/* save / clear / export / import */
+$('saveBtn').onclick = ()=>{ projectMessage = $('projectMsgDisplay').textContent; saveAll(); alert('Saved'); };
+$('clearBtn').onclick = ()=>{ if(!confirm('Clear ALL tasks?')) return; tasks=[]; messages=[]; projectMessage=''; bossNoteText=''; saveAll(); renderTasks(); applyRoleUI(); };
+
+$('exportBtn').onclick = ()=>{
+  const data = { tasks, messages, projectMessage, bossNoteText, exportedAt: nowISO() };
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download = `tasks_export_${Date.now()}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+};
+$('importBtn').onclick = ()=>{
+  const f = document.createElement('input'); f.type='file'; f.accept='application/json'; f.onchange = e => {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try{
+        const obj = JSON.parse(evt.target.result);
+        if(Array.isArray(obj.tasks)){
+          tasks = obj.tasks.map(t=>({ id: t.id || uid(), title: t.title || 'Untitled', createdAt: t.createdAt || nowISO(), lastUpdated: t.lastUpdated || nowISO(), bossStatus: t.bossStatus || 'pending' }));
+          messages = obj.messages || messages; projectMessage = obj.projectMessage || projectMessage; bossNoteText = obj.bossNoteText || bossNoteText;
+          saveAll(); renderTasks(); applyRoleUI(); alert('Imported');
+        } else alert('Invalid import file');
+      }catch(err){ alert('Invalid JSON'); }
+    };
+    reader.readAsText(file);
+  };
+  f.click();
+};
+
+/* boss quick message */
+$('sendQuickMsgBtn').onclick = ()=> {
+  if(role!=='zubair'){ alert('Unlock as Muhammad Zubair Ashrafi to send'); return; }
+  const txt = $('bossQuickMsg').value.trim(); if(!txt) return alert('Enter message');
+  const m = { id: uid(), taskId:null, type:'text', text:txt, from:'zubair', to:'creator', createdAt: nowISO(), read:false };
+  messages.push(m); saveAll(); $('bossQuickMsg').value=''; renderCommLists(); alert('Sent');
+};
+
+/* creator notifications */
+$('markAllRead').onclick = ()=>{ messages.forEach(m=>{ if(m.to==='creator') m.read=true; }); saveAll(); renderNotifications(); renderCommLists(); };
+
+/* beforeunload stop recording */
+window.addEventListener('beforeunload', ()=>{ if(activeRecorder && activeRecorder.state==='recording') activeRecorder.stop(); if(activeStream) activeStream.getTracks().forEach(t=>t.stop()); });
+
+</script>
+</body>
+</html>
